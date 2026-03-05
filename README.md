@@ -8,7 +8,7 @@ Built with Python/FastAPI, PostgreSQL, and Docker.
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
 
 ### Customer Shop
 Browse and purchase coupons instantly. Coupon code is revealed only after purchase.
@@ -259,4 +259,5 @@ purchased_at
 | frontend | nginx:alpine | 3000 |
 | backend | python:3.11-slim | 8000 |
 | postgres | postgres:16-alpine | 5432 |
+
 
