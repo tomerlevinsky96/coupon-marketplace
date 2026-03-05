@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coupon Marketplace</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f6fa; color: #1a1a2e; }
+    header { background: #1a1a2e; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+    .logo { color: white; font-size: 1.4rem; font-weight: 700; }
+    nav button { background: transparent; border: 1.5px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; margin-left: 8px; transition: all 0.2s; }
+    nav button:hover, nav button.active { background: #6c63ff; border-color: #6c63ff; color: white; }
+    main { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
+    h1 { font-size: 1.8rem; margin-bottom: 24px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+    .card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); transition: transform 0.2s; }
+    .card:hover { transform: translateY(-3px); }
+    .card img { width: 100%; height: 160px; object-fit: cover; }
+    .card-body { padding: 16px; }
+    .card-name { font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+    .card-desc { font-size: 0.85rem; color: #666; margin-bottom: 16px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; }
+    .price { font-size: 1.3rem; font-weight: 700; color: #6c63ff; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+    .btn-primary { background: #6c63ff; color: white; }
+    .btn-primary:hover { background: #5a52d5; }
+    .btn-danger { background: #fff0f0; color: #e53e3e; border: 1px solid #fecaca; }
+    .btn-danger:hover { background: #ffe0e0; }
+    .btn-secondary { background: white; color: #444; border: 1.5px solid #ddd; }
+    .btn-sm { padding: 6px 12px; font-size: 0.82rem; }
+    .auth-box { max-width: 400px; margin: 60px auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 8px 40px rgba(0,0,0,0.1); text-align: center; }
+    .auth-box h2 { margin-bottom: 24px; font-size: 1.5rem; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.92rem; outline: none; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus { border-color: #6c63ff; }
+    .btn-full { width: 100%; padding: 13px; margin-top: 8px; }
+    .table-wrap { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f8f9ff; padding: 14px 16px; text-align: left; font-size: 0.78rem; text-transform: uppercase; color: #666; border-bottom: 1px solid #eee; }
+    td { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
+    tr:last-child td { border-bottom: none; }
+    .sold { opacity: 0.5; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .stat-num { font-size: 2rem; font-weight: 800; color: #6c63ff; }
+    .stat-label { font-size: 0.82rem; color: #888; margin-top: 4px; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: 20px; padding: 32px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-header h2 { font-size: 1.3rem; font-weight: 700; }
+    .close-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #666; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88rem; }
+    .alert-success { background: #e6f9f0; color: #22863a; border: 1px solid #b7ebc8; }
+    .alert-error { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
+    .purchase-result { background: linear-gradient(135deg, #6c63ff, #4f46e5); color: white; border-radius: 16px; padding: 28px; margin-bottom: 28px; text-align: center; }
+    .coupon-code { font-size: 1.6rem; font-weight: 800; font-family: monospace; background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 8px; display: inline-block; margin: 12px 0; letter-spacing: 2px; }
+    .status-available { background: #e6f9f0; color: #22863a; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .status-sold { background: #f5f5f5; color: #888; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .min-price-preview { background: #f0edff; border: 1px solid #d4cfff; border-radius: 8px; padding: 10px 14px; font-size: 0.88rem; color: #5a4fcf; margin-bottom: 12px; }
+    .empty { text-align: center; padding: 60px; color: #888; }
+    .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🎟️ CouponMarket</div>
+  <nav>
+    <button class="active" onclick="showPage('shop')">🛍️ Shop</button>
+    <button onclick="showPage('admin-gate')">⚙️ Admin</button>
+  </nav>
+</header>
+
+<main>
+  <!-- SHOP PAGE -->
+  <div class="page active" id="page-shop">
+    <div class="page-header">
+      <h1>Available Coupons</h1>
+      <button class="btn btn-secondary" onclick="loadShop()">↻ Refresh</button>
+    </div>
+    <div id="purchase-result"></div>
+    <div id="shop-content"></div>
+  </div>
+
+  <!-- ADMIN LOGIN PAGE -->
+  <div class="page" id="page-admin-gate">
+    <div class="auth-box">
+      <div style="font-size:3rem;margin-bottom:12px">🔐</div>
+      <h2>Admin Login</h2>
+      <div id="login-error"></div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="login-username" placeholder="admin" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In</button>
+      <p style="margin-top:16px;font-size:0.8rem;color:#999">Default: admin / your password</p>
+    </div>
+  </div>
+
+  <!-- ADMIN DASHBOARD PAGE -->
+  <div class="page" id="page-admin">
+    <div class="page-header">
+      <h1>Admin Dashboard</h1>
+      <button class="btn btn-primary" onclick="openCreateModal()">+ New Coupon</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total</div></div>
+      <div class="stat"><div class="stat-num" id="stat-available">0</div><div class="stat-label">Available</div></div>
+      <div class="stat"><div class="stat-num" id="stat-sold">0</div><div class="stat-label">Sold</div></div>
+    </div>
+    <div id="admin-alert"></div>
+    <div id="admin-content"></div>
+  </div>
+</main>
+
+<!-- CREATE/EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Create Coupon</h2>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Name *</label>
+      <input type="text" id="f-name" placeholder="Amazon $100 Gift Card" />
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="f-desc" rows="2" placeholder="Describe this coupon..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Image URL *</label>
+      <input type="url" id="f-image" placeholder="https://example.com/image.jpg" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Cost Price ($) *</label>
+        <input type="number" id="f-cost" step="0.01" min="0" placeholder="80" oninput="updatePreview()" />
+      </div>
+      <div class="form-group">
+        <label>Margin (%) *</label>
+        <input type="number" id="f-margin" step="0.01" min="0" placeholder="25" oninput="updatePreview()" />
+      </div>
+    </div>
+    <div class="min-price-preview" id="price-preview">📊 Minimum Sell Price: —</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Value Type *</label>
+        <select id="f-vtype">
+          <option value="STRING">String (code)</option>
+          <option value="IMAGE">Image (URL)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Coupon Value *</label>
+        <input type="text" id="f-value" placeholder="ABCD-1234" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCoupon()" id="save-btn">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:8000';
+  let adminToken = null;
+  let editingId = null;
+
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    if (name === 'admin-gate' && adminToken) name = 'admin';
+    document.getElementById('page-' + name).classList.add('active');
+    const idx = name === 'shop' ? 0 : 1;
+    document.querySelectorAll('nav button')[idx].classList.add('active');
+    if (name === 'shop') loadShop();
+    if (name === 'admin') loadAdmin();
+  }
+
+  // ── Shop (public - no token needed) ──────────
+
+  async function loadShop() {
+    const el = document.getElementById('shop-content');
+    el.innerHTML = '<p style="text-align:center;padding:40px;color:#888">Loading...</p>';
+    try {
+      const res = await fetch(`${API}/api/admin/public/products`);
+      const products = await res.json();
+
+      if (products.length === 0) {
+        el.innerHTML = '<div class="empty"><div class="empty-icon">🏷️</div><p>No coupons available right now!</p></div>';
+        return;
+      }
+
+      el.innerHTML = '<div class="grid">' + products.map(p => `
+        <div class="card">
+          <img src="${p.image_url}" onerror="this.src='https://placehold.co/300x160?text=Coupon'" />
+          <div class="card-body">
+            <div class="card-name">${p.name}</div>
+            <div class="card-desc">${p.description || ''}</div>
+            <div class="card-footer">
+              <span class="price">$${parseFloat(p.price).toFixed(2)}</span>
+              <button class="btn btn-primary btn-sm" onclick="buyProduct('${p.id}', '${p.name}', ${p.price})">Buy Now</button>
+            </div>
+          </div>
+        </div>
+      `).join('') + '</div>';
+    } catch(e) {
+      el.innerHTML = '<div class="alert alert-error">Failed to load products</div>';
+    }
+  }
+
+  async function buyProduct(id, name, price) {
+    if (!confirm(`Purchase "${name}" for $${price}?`)) return;
+    try {
+      const res = await fetch(`${API}/api/admin/products/${id}/purchase`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail?.message || 'Purchase failed');
+
+      document.getElementById('purchase-result').innerHTML = `
+        <div class="purchase-result">
+          <div style="font-size:1.3rem;font-weight:700;margin-bottom:16px">🎉 Purchase Successful!</div>
+          <div style="opacity:0.8;font-size:0.85rem;text-transform:uppercase;letter-spacing:1px">Your Coupon Code</div>
+          <div class="coupon-code">${data.value}</div>
+          <div style="opacity:0.8;margin-top:8px">Paid: $${data.final_price}</div>
+          <button class="btn btn-secondary" style="margin-top:16px" onclick="document.getElementById('purchase-result').innerHTML=''">Close</button>
+        </div>
+      `;
+      loadShop();
+    } catch(e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
+  // ── Admin Login ───────────────────────────────
+
+  async function doLogin() {
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+    document.getElementById('login-error').innerHTML = '';
+    try {
+      const res = await fetch(`${API}/api/admin/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail?.message || 'Login failed');
+      adminToken = data.token;
+      showPage('admin');
+    } catch(e) {
+      document.getElementById('login-error').innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+    }
+  }
+
+  // ── Admin Dashboard (requires token) ─────────
+
+  async function loadAdmin() {
+    try {
+      const res = await fetch(`${API}/api/admin/products`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      const products = await res.json();
+
+      document.getElementById('stat-total').textContent = products.length;
+      document.getElementById('stat-available').textContent = products.filter(p => !p.is_sold).length;
+      document.getElementById('stat-sold').textContent = products.filter(p => p.is_sold).length;
+
+      if (products.length === 0) {
+        document.getElementById('admin-content').innerHTML = '<div class="empty"><div class="empty-icon">📦</div><p>No products yet!</p></div>';
+        return;
+      }
+
+      document.getElementById('admin-content').innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th><th>Cost</th><th>Margin</th>
+                <th>Min Price</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${products.map(p => `
+                <tr class="${p.is_sold ? 'sold' : ''}">
+                  <td><strong>${p.name}</strong><br><small style="color:#888">${p.description || ''}</small></td>
+                  <td>$${parseFloat(p.cost_price).toFixed(2)}</td>
+                  <td>${parseFloat(p.margin_percentage).toFixed(1)}%</td>
+                  <td><strong>$${parseFloat(p.minimum_sell_price).toFixed(2)}</strong></td>
+                  <td>${p.is_sold ? '<span class="status-sold">✓ Sold</span>' : '<span class="status-available">◉ Available</span>'}</td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="openEditModal('${p.id}')" ${p.is_sold ? 'disabled' : ''}>Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}', '${p.name}')">Delete</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } catch(e) {
+      document.getElementById('admin-content').innerHTML = '<div class="alert alert-error">Failed to load products</div>';
+    }
+  }
+
+  async function deleteProduct(id, name) {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`${API}/api/admin/products/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      if (!res.ok) throw new Error('Delete failed');
+      loadAdmin();
+    } catch(e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
+  // ── Modal ─────────────────────────────────────
+
+  function openCreateModal() {
+    editingId = null;
+    document.getElementById('modal-title').textContent = 'Create Coupon';
+    document.getElementById('save-btn').textContent = 'Create';
+    ['f-name','f-desc','f-image','f-cost','f-margin','f-value'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-vtype').value = 'STRING';
+    updatePreview();
+    document.getElementById('modal').classList.add('open');
+  }
+
+  async function openEditModal(id) {
+    editingId = id;
+    document.getElementById('modal-title').textContent = 'Edit Coupon';
+    document.getElementById('save-btn').textContent = 'Update';
+    const res = await fetch(`${API}/api/admin/products/${id}`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    const p = await res.json();
+    document.getElementById('f-name').value = p.name;
+    document.getElementById('f-desc').value = p.description || '';
+    document.getElementById('f-image').value = p.image_url;
+    document.getElementById('f-cost').value = p.cost_price;
+    document.getElementById('f-margin').value = p.margin_percentage;
+    document.getElementById('f-vtype').value = p.value_type;
+    document.getElementById('f-value').value = p.coupon_value;
+    updatePreview();
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+  }
+
+  function updatePreview() {
+    const cost = parseFloat(document.getElementById('f-cost').value);
+    const margin = parseFloat(document.getElementById('f-margin').value);
+    if (!isNaN(cost) && !isNaN(margin)) {
+      const min = (cost * (1 + margin / 100)).toFixed(2);
+      document.getElementById('price-preview').textContent = `📊 Minimum Sell Price: $${min} = $${cost} × (1 + ${margin}%)`;
+    } else {
+      document.getElementById('price-preview').textContent = '📊 Minimum Sell Price: —';
+    }
+  }
+
+  async function saveCoupon() {
+    const body = {
+      name: document.getElementById('f-name').value,
+      description: document.getElementById('f-desc').value,
+      image_url: document.getElementById('f-image').value,
+      cost_price: parseFloat(document.getElementById('f-cost').value),
+      margin_percentage: parseFloat(document.getElementById('f-margin').value),
+      value_type: document.getElementById('f-vtype').value,
+      coupon_value: document.getElementById('f-value').value,
+    };
+    const url = editingId ? `${API}/api/admin/products/${editingId}` : `${API}/api/admin/products`;
+    const method = editingId ? 'PATCH' : 'POST';
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail?.message || 'Save failed');
+      }
+      closeModal();
+      loadAdmin();
+    } catch(e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
+  loadShop();
+</script>
+</body>
+</html>
