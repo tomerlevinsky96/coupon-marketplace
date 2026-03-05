@@ -1,4 +1,4 @@
-# 🎟️ Coupon Marketplace
+#  Coupon Marketplace
 
 A production-ready full-stack digital coupon marketplace supporting two sales channels:
 - **Direct customers** via a web frontend
@@ -18,7 +18,7 @@ Full CRUD management with real-time pricing preview and sales statistics.
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Customer UI   │     │   Reseller API  │     │   Admin UI      │
@@ -53,7 +53,7 @@ Full CRUD management with real-time pricing preview and sales statistics.
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
@@ -88,13 +88,13 @@ docker compose up --build
 
 | Service | URL |
 |---------|-----|
-| 🛍️ Customer Shop | http://localhost:3000 |
-| ⚙️ Admin Dashboard | http://localhost:3000 (click Admin) |
-| 📡 API Docs | http://localhost:8000/docs |
+|  Customer Shop | http://localhost:3000 |
+|  Admin Dashboard | http://localhost:3000 (click Admin) |
+|  API Docs | http://localhost:8000/docs |
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 ```
 coupon-marketplace/
 ├── backend/
@@ -126,7 +126,7 @@ coupon-marketplace/
 
 ---
 
-## 💰 Pricing System
+##  Pricing System
 
 Minimum sell price is enforced at the **database level** using a PostgreSQL computed column:
 ```sql
@@ -135,9 +135,9 @@ minimum_sell_price NUMERIC GENERATED ALWAYS AS
 ```
 
 This means:
-- ✅ Cannot be overridden by application code
-- ✅ Cannot be overridden even by direct SQL
-- ✅ Always mathematically correct
+-  Cannot be overridden by application code
+-  Cannot be overridden even by direct SQL
+-  Always mathematically correct
 
 ### Example
 | cost_price | margin_percentage | minimum_sell_price |
@@ -148,7 +148,7 @@ This means:
 
 ---
 
-## 🔐 Authentication
+##  Authentication
 
 ### Admin (JWT)
 - Login via `POST /api/admin/auth/login`
@@ -162,13 +162,13 @@ This means:
 
 ---
 
-## 🛒 User Flows
+##  User Flows
 
 ### Customer
 1. Visit `http://localhost:3000`
 2. Browse available coupons
 3. Click **Buy Now**
-4. Coupon code revealed instantly ✅
+4. Coupon code revealed instantly 
 
 ### Reseller
 ```bash
@@ -219,7 +219,7 @@ curl -X POST http://localhost:8000/api/v1/products/{id}/purchase \
 
 ---
 
-## 🔒 Security Features
+##  Security Features
 
 - **Bcrypt hashing** — passwords and API tokens never stored in plain text
 - **JWT expiry** — admin sessions expire after 8 hours
@@ -252,10 +252,11 @@ purchased_at
 
 ---
 
-## 🐳 Docker Services
+##  Docker Services
 
 | Service | Image | Port |
 |---------|-------|------|
 | frontend | nginx:alpine | 3000 |
 | backend | python:3.11-slim | 8000 |
 | postgres | postgres:16-alpine | 5432 |
+
